@@ -44,9 +44,8 @@ const port = process.env.PORT || 3000;
 
 io.on('connection', (socket) => {
   socket.emit('me', socket.id);
-  console.log('got a connection');
 
-  socket.on('identifyUser', async ({ userId, from, user, username }) => {
+  socket.on('identifyUser', async ({ userId }) => {
     socket.userIdForOnline = userId;
     await User.findByIdAndUpdate(
       userId,
@@ -56,15 +55,6 @@ io.on('connection', (socket) => {
         runValidators: true,
       },
     );
-    const res = await User.find().select('socketId');
-    await res.forEach((element) => {
-      io.to(element.socketId).emit('updateCallingId', {
-        callerid: userId,
-        socketId: from,
-        user: user,
-        username: username,
-      });
-    });
   });
 
   socket.on('disconnect', async () => {
